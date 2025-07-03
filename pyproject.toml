@@ -1,0 +1,31 @@
+[project]
+name = "vsputils"
+version = "0.0.1"
+description = ""
+authors = [
+  { name="Hidden", email="ketakopter@gmail.com" },
+]
+dependencies = [
+  "numpy",
+  "pandas"
+]
+readme = "README.md"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vsputils*"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--cov=vsputils",
+  "--cov=tests",
+  "--cov-report=xml",
+]
