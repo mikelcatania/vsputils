@@ -78,6 +78,12 @@ def get_excres_drag() -> pd.DataFrame:
     return df
 
 
+def get_parasite_sref() -> float:
+    rid = vsp.FindLatestResultsID("Parasite_Drag")
+    sref = vsp.GetDoubleResults(rid, "FC_Sref")
+    return sref[0]
+
+
 def run_case(fname: str, case_dict: dict):
 
     _results_map = {
