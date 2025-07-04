@@ -2212,8 +2212,8 @@
       <Name>VSPAEROSettings</Name>
       <VSPAERO>
         <ActuatorDiskFlag Value="0.000000000000000000e+00" ID="SFZXBAAGMZK"/>
-        <AlphaEnd Value="1.000000000000000000e+01" ID="ZJYSILBZCCZ"/>
-        <AlphaNpts Value="7.000000000000000000e+00" ID="ZWTORCHUURT"/>
+        <AlphaEnd Value="2.000000000000000000e+00" ID="ZJYSILBZCCZ"/>
+        <AlphaNpts Value="2.000000000000000000e+00" ID="ZWTORCHUURT"/>
         <AlphaStart Value="0.000000000000000000e+00" ID="HHUXSVUOPRU"/>
         <AlternateInputFormatFlag Value="0.000000000000000000e+00" ID="UZYHUMPWRRH"/>
         <AnalysisMethod Value="0.000000000000000000e+00" ID="COOROPVHUOF"/>
@@ -2228,8 +2228,8 @@
         <CpSliceFlag Value="1.000000000000000000e+00" ID="GSWYBFUAUUZ"/>
         <CpSlicePlotLinesFlag Value="1.000000000000000000e+00" ID="QAZQVQWSNDZ"/>
         <CpSliceYAxisFlipFlag Value="0.000000000000000000e+00" ID="YBAHXNVKLDE"/>
-        <FarDist Value="4.000000000000000000e+01" ID="NMYQXTCELIH"/>
-        <FarDistToggle Value="1.000000000000000000e+00" ID="HLSEODHLHZW"/>
+        <FarDist Value="-1.000000000000000000e+00" ID="NMYQXTCELIH"/>
+        <FarDistToggle Value="0.000000000000000000e+00" ID="HLSEODHLHZW"/>
         <FixedWakeFlag Value="0.000000000000000000e+00" ID="IDMYFMXPQIY"/>
         <FromSteadyState Value="0.000000000000000000e+00" ID="NLDWADUIGJA"/>
         <GeomSet Value="1.000000000000000000e+00" ID="FGSOSACWBJS"/>
@@ -2342,9 +2342,25 @@
     </CpSlice>
     <UnsteadyGroupCount>1</UnsteadyGroupCount>
     <Unsteady_Group>
-      <NumberOfComponents>1</NumberOfComponents>
+      <NumberOfComponents>5</NumberOfComponents>
       <Component>
         <CompID>FJTRPKAMIT</CompID>
+        <SurfIndex>1</SurfIndex>
+      </Component>
+      <Component>
+        <CompID>WTVGJDMBHF</CompID>
+        <SurfIndex>1</SurfIndex>
+      </Component>
+      <Component>
+        <CompID>IUMPRKUCAI</CompID>
+        <SurfIndex>1</SurfIndex>
+      </Component>
+      <Component>
+        <CompID>LDKCGNCZTH</CompID>
+        <SurfIndex>1</SurfIndex>
+      </Component>
+      <Component>
+        <CompID>MPLBPGDYNU</CompID>
         <SurfIndex>1</SurfIndex>
       </Component>
       <ParmContainer>
