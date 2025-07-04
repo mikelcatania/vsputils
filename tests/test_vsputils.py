@@ -9,6 +9,10 @@ res_dir = Path(__file__).parent.joinpath('resources')
 
 class TestGeom(unittest.TestCase):
 
+    def setUp(self):
+        err = vsp.ErrorMgrSingleton.getInstance()
+        err.SilenceErrors()
+
     def test_start(self):
 
         vspu.restart(res_dir / 'simple.vsp3')
