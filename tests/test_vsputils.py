@@ -121,6 +121,13 @@ class TestGeom(unittest.TestCase):
 
         self.assertEqual(vspu.get_parasite_sref(), 102.0)
 
+    def tearDown(self):
+
+        for f in res_dir.glob("*CompGeom*"):
+            f.unlink()
+        for f in res_dir.glob("*Parasite*"):
+            f.unlink()
+
 
 if __name__ == "__main__":
     unittest.main()
