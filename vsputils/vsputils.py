@@ -2,6 +2,8 @@ import openvsp as vsp
 import pandas as pd
 from pathlib import Path
 import yaml
+from importlib.resources import files
+import jsonschema
 
 
 def restart(fname: str | Path) -> None:
@@ -50,7 +52,7 @@ def res2df(rid: str, cols: list[str]) -> pd.DataFrame:
     return df
 
 
-def get_load_results():
+def get_load_results() -> pd.DataFrame:
     def load_df(idx):
         rid = vsp.FindResultsID("VSPAERO_Load", idx)
         aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
@@ -65,7 +67,7 @@ def get_load_results():
     return df
 
 
-def get_vspaero_refs():
+def get_vspaero_refs() -> tuple[float]:
     rid = vsp.FindLatestResultsID("VSPAERO_Load")
     b_ref = res2lst(rid, "FC_Bref_")[0]
     c_ref = res2lst(rid, "FC_Cref_")[0]
@@ -101,49 +103,19 @@ def get_parasite_sref() -> float:
     return sref[0]
 
 
-def run_case(case_dict: dict):
-
-    _results_map = {
-        "VSPAEROSweep": [get_load_results, get_polar_results],
-        "ParasiteDrag": [get_geom_drag, get_excres_drag]
-    }
-
-    res = []
-
-    restart(case_dict['fname'])
-    changes = case_dict.get('changes', None)
-    for change in changes or []:
-        c, g, p, v = parse_parm_change(change)
-        change_parm(c, g, p, v)
-
-    for an, cfg in case_dict['analyses'].items():
-        vsp.SetAnalysisInputDefaults(an)
-        if cfg is not None:
-            for name, value in cfg.items():
-                change_an_input(an, name, value)
-
-        vsp.ExecAnalysis(an)
-
-        for f in _results_map.get(an) or []:
-            res.append(f())
-
-    vsp.DeleteAllResults()
-
-    return res
-
-
 class VspuException(Exception):
     pass
 
 
 class Refs:
-    def __init__(self, b, c, S, x, y, z):
+    def __init__(self, b=1, c=1, S=1, x=1, y=1, z=1):
         self.b = b
         self.c = c
         self.S = S
         self.x = x
         self.y = y
         self.z = z
+        self.S_CD0 = None
 
 
 class Runner:
@@ -156,7 +128,7 @@ class Runner:
         self.geom_drag = None
         self.excres_drag = None
         self.sweep = None
-        self.refs = None
+        self.refs = Refs()
 
         self.errorMgr = vsp.ErrorMgrSingleton.getInstance()
         self.errorMgr.SilenceErrors()
@@ -173,8 +145,8 @@ class Runner:
         self.rerr()
 
     def change_model(self):
-        changes = self.d.get('changes', [])
-        for change in changes:
+        changes = self.d.get('changes')
+        for change in changes or []:
             c, g, p, v = parse_parm_change(change)
             change_parm(c, g, p, v)
         self.rerr()
@@ -195,12 +167,19 @@ class Runner:
             if an == "ParasiteDrag":
                 self.geom_drag = get_geom_drag()
                 self.excres_drag = get_excres_drag()
+                self.refs.S_CD0 = get_parasite_sref()
 
         vsp.DeleteAllResults()
         self.rerr()
 
 
-def load_yaml(fname):
-    with open(fname) as fp:
+def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
+    with open(str(fname)) as fp:
         d = yaml.safe_load(fp)
+    if validate:
+        schema_path = files("vsputils.schemas").joinpath("cases.json")
+        with schema_path.open("r") as fp:
+            sc = yaml.safe_load(fp)
+        jsonschema.validate(instance=d, schema=sc)
+
     return [Runner(case_dict) for case_dict in d['cases']]

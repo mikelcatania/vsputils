@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "properties": {
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "fname": {
+            "type": "string"
+          },
+          "changes": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[^:]+:[^:]+:[^:]+:[^:]+$"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "analyses": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "fname",
+          "analyses"
+        ]
+      }
+    }
+  },
+  "required": [
+    "cases"
+  ]
+}

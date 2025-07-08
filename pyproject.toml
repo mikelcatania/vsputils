@@ -23,6 +23,9 @@ include-package-data = true
 where = ["."]
 include = ["vsputils*"]
 
+[tool.setuptools.package-data]
+vsputils = ["schemas/*.json"]
+
 [tool.pytest.ini_options]
 addopts = [
   "--cov=vsputils",
