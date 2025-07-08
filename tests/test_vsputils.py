@@ -89,7 +89,7 @@ class TestGeom(unittest.TestCase):
         self.assertFalse(df.empty)
         self.assertSetEqual(set(df.columns),
                             set(["WingId", "Yavg", "cl*c/cref", "cd*c/cref",
-                                 "cmy*c/cref", "aoa", "aoa_idx"]))
+                                 "cmy*c/cref", "Chord", "aoa", "aoa_idx"]))
 
     def test_get_polar_results(self):
         vsp_file = res_dir / "simple.vsp3"

@@ -1,6 +1,7 @@
 import openvsp as vsp
 import pandas as pd
 from pathlib import Path
+import yaml
 
 
 def restart(fname: str | Path) -> None:
@@ -15,7 +16,7 @@ def parse_parm_change(cstring: str):
 
 
 def change_parm(container: str, group: str, parm: str, value: float) -> None:
-    gid = vsp.FindGeom(container, 0)
+    gid = vsp.FindContainer(container, 0)
     vsp.SetParmVal(gid, parm, group, value)
     vsp.Update()
 
@@ -31,18 +32,21 @@ def change_an_input(an: str, name: str, value: float | int | str) -> None:
     fun(an, name, [value])
 
 
-def res2df(rid: str, cols: list[str]) -> pd.DataFrame:
+def res2lst(rid: str, col: str) -> tuple[float | str | int]:
     get_funs = {
         vsp.INT_DATA: vsp.GetIntResults,
         vsp.DOUBLE_DATA: vsp.GetDoubleResults,
         vsp.STRING_DATA: vsp.GetStringResults
     }
+    fun = get_funs[vsp.GetResultsType(rid, col)]
+    v = fun(rid, col)
+    return v
 
+
+def res2df(rid: str, cols: list[str]) -> pd.DataFrame:
     df = pd.DataFrame()
     for c in cols:
-        fun = get_funs[vsp.GetResultsType(rid, c)]
-        v = fun(rid, c)
-        df[c] = v
+        df[c] = res2lst(rid, c)
     return df
 
 
@@ -51,13 +55,26 @@ def get_load_results():
         rid = vsp.FindResultsID("VSPAERO_Load", idx)
         aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
         df = res2df(rid,
-                    ["WingId", "Yavg", "cl*c/cref", "cd*c/cref", "cmy*c/cref"])
+                    ["WingId", "Yavg", "cl*c/cref", "cd*c/cref",
+                     "cmy*c/cref", "Chord"])
         df['aoa'] = aoa
         df['aoa_idx'] = idx
         return df
     dflst = [load_df(i) for i in range(vsp.GetNumResults("VSPAERO_Load"))]
     df = pd.concat(dflst, ignore_index=True, sort=False)
     return df
+
+
+def get_vspaero_refs():
+    rid = vsp.FindLatestResultsID("VSPAERO_Load")
+    b_ref = res2lst(rid, "FC_Bref_")[0]
+    c_ref = res2lst(rid, "FC_Cref_")[0]
+    S_ref = res2lst(rid, "FC_Sref_")[0]
+    x_ref = res2lst(rid, "FC_Xcg_")[0]
+    y_ref = res2lst(rid, "FC_Ycg_")[0]
+    z_ref = res2lst(rid, "FC_Zcg_")[0]
+
+    return b_ref, c_ref, S_ref, x_ref, y_ref, z_ref
 
 
 def get_polar_results() -> pd.DataFrame:
@@ -84,7 +101,7 @@ def get_parasite_sref() -> float:
     return sref[0]
 
 
-def run_case(fname: str, case_dict: dict):
+def run_case(case_dict: dict):
 
     _results_map = {
         "VSPAEROSweep": [get_load_results, get_polar_results],
@@ -93,7 +110,7 @@ def run_case(fname: str, case_dict: dict):
 
     res = []
 
-    restart(fname)
+    restart(case_dict['fname'])
     changes = case_dict.get('changes', None)
     for change in changes or []:
         c, g, p, v = parse_parm_change(change)
@@ -108,8 +125,82 @@ def run_case(fname: str, case_dict: dict):
         vsp.ExecAnalysis(an)
 
         for f in _results_map.get(an) or []:
-            res.append(f)
+            res.append(f())
 
     vsp.DeleteAllResults()
 
     return res
+
+
+class VspuException(Exception):
+    pass
+
+
+class Refs:
+    def __init__(self, b, c, S, x, y, z):
+        self.b = b
+        self.c = c
+        self.S = S
+        self.x = x
+        self.y = y
+        self.z = z
+
+
+class Runner:
+
+    def __init__(self, case_dict: dict):
+        self.d = case_dict
+        self.name = case_dict['name']
+        self.polar = None
+        self.load = None
+        self.geom_drag = None
+        self.excres_drag = None
+        self.sweep = None
+        self.refs = None
+
+        self.errorMgr = vsp.ErrorMgrSingleton.getInstance()
+        self.errorMgr.SilenceErrors()
+
+    def rerr(self):
+        '''Check and raise errors'''
+        errs = [self.errorMgr.PopLastError().GetErrorString()
+                for i in range(self.errorMgr.GetNumTotalErrors())][::-1]
+        if errs:
+            raise VspuException('\n'.join(errs))
+
+    def restart(self):
+        restart(self.d['fname'])
+        self.rerr()
+
+    def change_model(self):
+        changes = self.d.get('changes', [])
+        for change in changes:
+            c, g, p, v = parse_parm_change(change)
+            change_parm(c, g, p, v)
+        self.rerr()
+
+    def exec_an(self):
+        for an, cfg in self.d['analyses'].items():
+            vsp.SetAnalysisInputDefaults(an)
+            if cfg is not None:
+                for name, value in cfg.items():
+                    change_an_input(an, name, value)
+
+            vsp.ExecAnalysis(an)
+
+            if an == "VSPAEROSweep":
+                self.polar = get_polar_results()
+                self.load = get_load_results()
+                self.refs = Refs(*get_vspaero_refs())
+            if an == "ParasiteDrag":
+                self.geom_drag = get_geom_drag()
+                self.excres_drag = get_excres_drag()
+
+        vsp.DeleteAllResults()
+        self.rerr()
+
+
+def load_yaml(fname):
+    with open(fname) as fp:
+        d = yaml.safe_load(fp)
+    return [Runner(case_dict) for case_dict in d['cases']]
