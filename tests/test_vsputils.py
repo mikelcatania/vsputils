@@ -7,7 +7,7 @@ import vsputils.vsputils as vspu
 res_dir = Path(__file__).parent.joinpath('resources')
 
 
-class TestGeom(unittest.TestCase):
+class TestFuns(unittest.TestCase):
 
     def setUp(self):
         err = vsp.ErrorMgrSingleton.getInstance()
@@ -91,6 +91,15 @@ class TestGeom(unittest.TestCase):
                             set(["WingId", "Yavg", "cl*c/cref", "cd*c/cref",
                                  "cmy*c/cref", "Chord", "aoa", "aoa_idx"]))
 
+    def test_get_vspaero_refs(self):
+        vsp_file = res_dir / "simple.vsp3"
+        vspu.restart(vsp_file)
+        vsp.ExecAnalysis("VSPAEROReadPreviousAnalysis")
+
+        bcSxyz = vspu.get_vspaero_refs()
+
+        self.assertTupleEqual(bcSxyz, (34.0, 3.0, 102.0, 0.0, 0.0, 0.0))
+
     def test_get_polar_results(self):
         vsp_file = res_dir / "simple.vsp3"
         vspu.restart(vsp_file)
@@ -128,6 +137,45 @@ class TestGeom(unittest.TestCase):
         for f in res_dir.glob("*Parasite*"):
             f.unlink()
 
+
+class TestRefs(unittest.TestCase):
+
+    def setUp(self):
+        err = vsp.ErrorMgrSingleton.getInstance()
+        err.SilenceErrors()
+
+    def test_init(self):
+        r = vspu.Refs()
+        self.assertEqual(r.b, 1)
+        self.assertEqual(r.c, 1)
+        self.assertEqual(r.S, 1)
+        self.assertEqual(r.x, 1)
+        self.assertEqual(r.y, 1)
+        self.assertEqual(r.z, 1)
+
+    def test_refs_custom_instantiation(self):
+        r = vspu.Refs(b=2, c=3, S=4, x=5, y=6, z=7)
+        self.assertEqual(r.b, 2)
+        self.assertEqual(r.c, 3)
+        self.assertEqual(r.S, 4)
+        self.assertEqual(r.x, 5)
+        self.assertEqual(r.y, 6)
+        self.assertEqual(r.z, 7)
+
+    def test_refs_fromrefs(self):
+        r = vspu.Refs.from_vspaero_ref((2, 3, 4, 5, 6, 7))
+        self.assertEqual(r.b, 2)
+        self.assertEqual(r.c, 3)
+        self.assertEqual(r.S, 4)
+        self.assertEqual(r.x, 5)
+        self.assertEqual(r.y, 6)
+        self.assertEqual(r.z, 7)
+
+    def test_refs_fromrefs_invalid_tuple(self):
+        with self.assertRaises(ValueError):
+            vspu.Refs.from_vspaero_ref((1, 2, 3))  # Tuple with fewer than 6 elements
+
+        
 
 if __name__ == "__main__":
     unittest.main()

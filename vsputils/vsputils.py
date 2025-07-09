@@ -108,14 +108,21 @@ class VspuException(Exception):
 
 
 class Refs:
-    def __init__(self, b=1, c=1, S=1, x=1, y=1, z=1):
+    def __init__(self, b=1, c=1, S=1, x=1, y=1, z=1, S_CD0=1):
         self.b = b
         self.c = c
         self.S = S
         self.x = x
         self.y = y
         self.z = z
-        self.S_CD0 = None
+        self.S_CD0 = S_CD0
+
+    @classmethod
+    def from_vspaero_ref(cls, bcSxyz_tuple: tuple[float]):
+        if len(bcSxyz_tuple) != 6:
+            raise ValueError(
+                "Tuple must have exactly 6 elements: (b, c, S, x, y, z)")
+        return cls(*bcSxyz_tuple)
 
 
 class Runner:
@@ -163,7 +170,7 @@ class Runner:
             if an == "VSPAEROSweep":
                 self.polar = get_polar_results()
                 self.load = get_load_results()
-                self.refs = Refs(*get_vspaero_refs())
+                self.refs = Refs.from_vspaero_ref(get_vspaero_refs())
             if an == "ParasiteDrag":
                 self.geom_drag = get_geom_drag()
                 self.excres_drag = get_excres_drag()
