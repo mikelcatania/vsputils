@@ -41,7 +41,8 @@
           },
           "del_subsurf": {
             "type": "boolean"
-          }
+          },
+            "airfoils": {"type": "array", "items": {"type": "string", "pattern": "^[^:]+:[^:]+:[^:]+$"}}
         },
         "required": [
           "name",

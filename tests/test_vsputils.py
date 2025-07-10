@@ -184,6 +184,7 @@ class TestYaml(unittest.TestCase):
                     [{'name': 'somename',
                       'fname': 'ac.vsp3',
                       'changes': None,
+                      'airfoils': ['cont:0:some/path', 'cont:1:some/other/path'],
                       'analyses': {'DefaultAnal': None,
                                    'AnalWithChanges':
                                    {'Alpha': 2.2, 'File': 'log.txt'}}},
@@ -214,6 +215,7 @@ class TestYaml(unittest.TestCase):
                     [{'name': 'somename',
                       'fname': 'ac.vsp3',
                       'changes': None,
+                      'airfoils': ['cont:0:some/path', 'cont:1:some/other/path'],
                       'analyses': {'DefaultAnal': None,
                                    'AnalWithChanges':
                                    {'Alpha': 2.2, 'File': 'log.txt'}}},

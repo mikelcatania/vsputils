@@ -2,6 +2,9 @@ cases:
   - name: somename
     fname: ac.vsp3
     changes:
+    airfoils:
+      - cont:0:some/path
+      - cont:1:some/other/path
     analyses:
       DefaultAnal:
       AnalWithChanges:

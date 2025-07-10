@@ -23,6 +23,21 @@ def change_parm(container: str, group: str, parm: str, value: float) -> None:
     vsp.Update()
 
 
+def parse_airfoil_change(cstring: str):
+    container, sec_num, fname = cstring.split(':')
+    sec_num = int(sec_num)
+    return container, sec_num, fname
+
+
+def change_airfoil(container: str, sec_num: int, fname: str | Path) -> None:
+    gid = vsp.FindContainer(container, 0)
+    sid = vsp.GetXSecSurf(gid, 0)
+    vsp.ChangeXSecShape(sid, sec_num, vsp.XS_FILE_AIRFOIL)
+    xsec = vsp.GetXSec(sid, sec_num)
+    vsp.ReadFileAirfoil(xsec, str(fname))
+    vsp.Update()
+
+
 def change_an_input(an: str, name: str, value: float | int | str) -> None:
     '''Note: value is a single value, without having to wrap it into a list.'''
     set_funs = {
@@ -158,6 +173,12 @@ class Runner:
             change_parm(c, g, p, v)
         self.rerr()
 
+    def change_airfoils(self):
+        for af in self.d.get('airfoils', []):
+            container, sec_num, fname = parse_airfoil_change(af)
+            change_airfoil(container, sec_num, fname)
+        self.rerr()
+
     def del_subsurf(self):
         if not self.d.get('del_subsurf'):
             return
@@ -185,6 +206,13 @@ class Runner:
 
         vsp.DeleteAllResults()
         self.rerr()
+
+    def run_all(self):
+        self.restart()
+        self.change_model()
+        self.change_airfoils()
+        self.del_subsurf()
+        self.exec_an()
 
 def load_yaml_dict(fname: str | Path, validate: bool = True) -> dict:
     with open(str(fname)) as fp:
