@@ -1,0 +1,10 @@
+cases:
+  - name: somename
+    fname: ac.vsp3
+    changes:
+  - name: another
+    changes:
+      - cont:gr:parm1:3.3
+      - cont:gr:parm2:4.4
+    analyses:
+      DefaultAnal:
