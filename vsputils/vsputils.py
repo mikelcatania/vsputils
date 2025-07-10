@@ -158,6 +158,13 @@ class Runner:
             change_parm(c, g, p, v)
         self.rerr()
 
+    def del_subsurf(self):
+        if not self.d.get('del_subsurf'):
+            return
+        for sid in vsp.GetAllSubSurfIDs():
+            vsp.DeleteSubSurf(sid)
+        vsp.Update()
+
     def exec_an(self):
         for an, cfg in self.d['analyses'].items():
             vsp.SetAnalysisInputDefaults(an)

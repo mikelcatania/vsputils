@@ -38,6 +38,9 @@
                 }
               ]
             }
+          },
+          "del_subsurf": {
+            "type": "boolean"
           }
         },
         "required": [

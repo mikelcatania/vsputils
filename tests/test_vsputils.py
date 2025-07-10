@@ -189,6 +189,7 @@ class TestYaml(unittest.TestCase):
                                    {'Alpha': 2.2, 'File': 'log.txt'}}},
                      {'name': 'another',
                       'fname': 'ad.vsp3',
+                      'del_subsurf': True,
                       'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
                       'analyses': {'DefaultAnal': None}}]}
 
@@ -218,6 +219,7 @@ class TestYaml(unittest.TestCase):
                                    {'Alpha': 2.2, 'File': 'log.txt'}}},
                      {'name': 'another',
                       'fname': 'ad.vsp3',
+                      'del_subsurf': True,
                       'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
                       'analyses': {'DefaultAnal': None}}]}
 

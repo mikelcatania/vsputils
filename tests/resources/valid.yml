@@ -9,6 +9,7 @@ cases:
         File: log.txt
   - name: another
     fname: ad.vsp3
+    del_subsurf: true
     changes:
       - cont:gr:parm1:3.3
       - cont:gr:parm2:4.4
