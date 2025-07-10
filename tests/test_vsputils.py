@@ -3,6 +3,7 @@ import pandas as pd
 import unittest
 import openvsp as vsp
 import vsputils.vsputils as vspu
+from jsonschema import ValidationError
 
 res_dir = Path(__file__).parent.joinpath('resources')
 
@@ -175,7 +176,59 @@ class TestRefs(unittest.TestCase):
         with self.assertRaises(ValueError):
             vspu.Refs.from_vspaero_ref((1, 2, 3))  # Tuple with fewer than 6 elements
 
-        
+class TestYaml(unittest.TestCase):
+
+    def test_valid(self):
+        dct = vspu.load_yaml_dict(res_dir.joinpath('valid.yml'), validate=True)
+        ref_dict = {'cases':
+                    [{'name': 'somename',
+                      'fname': 'ac.vsp3',
+                      'changes': None,
+                      'analyses': {'DefaultAnal': None,
+                                   'AnalWithChanges':
+                                   {'Alpha': 2.2, 'File': 'log.txt'}}},
+                     {'name': 'another',
+                      'fname': 'ad.vsp3',
+                      'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
+                      'analyses': {'DefaultAnal': None}}]}
+
+        self.assertDictEqual(ref_dict, dct)
+
+    def test_invalid(self):
+        with self.assertRaises(ValidationError):
+            dct = vspu.load_yaml_dict(res_dir.joinpath('invalid.yml'), validate=True)
+
+        dct = vspu.load_yaml_dict(res_dir.joinpath('invalid.yml'), validate=False)
+        ref_dict = {'cases':
+                    [{'name': 'somename', 'fname': 'ac.vsp3', 'changes': None},
+                     {'name': 'another',
+                      'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
+                      'analyses': {'DefaultAnal': None}}]}
+        self.assertDictEqual(ref_dict, dct)
+
+    def test_runner(self):
+
+        rnrs = vspu.load_yaml(res_dir.joinpath('valid.yml'))
+        ref_dict = {'cases':
+                    [{'name': 'somename',
+                      'fname': 'ac.vsp3',
+                      'changes': None,
+                      'analyses': {'DefaultAnal': None,
+                                   'AnalWithChanges':
+                                   {'Alpha': 2.2, 'File': 'log.txt'}}},
+                     {'name': 'another',
+                      'fname': 'ad.vsp3',
+                      'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
+                      'analyses': {'DefaultAnal': None}}]}
+
+        self.assertDictEqual(ref_dict['cases'][0], rnrs[0].d)
+        self.assertDictEqual(ref_dict['cases'][1], rnrs[1].d)
+
+
+class TestRunner(unittest.TestCase):
+
+    def rerr(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()

@@ -179,8 +179,7 @@ class Runner:
         vsp.DeleteAllResults()
         self.rerr()
 
-
-def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
+def load_yaml_dict(fname: str | Path, validate: bool = True) -> dict:
     with open(str(fname)) as fp:
         d = yaml.safe_load(fp)
     if validate:
@@ -188,5 +187,8 @@ def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
         with schema_path.open("r") as fp:
             sc = yaml.safe_load(fp)
         jsonschema.validate(instance=d, schema=sc)
+    return d
 
+def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
+    d = load_yaml_dict(fname, validate)
     return [Runner(case_dict) for case_dict in d['cases']]
