@@ -139,6 +139,9 @@ class Refs:
                 "Tuple must have exactly 6 elements: (b, c, S, x, y, z)")
         return cls(*bcSxyz_tuple)
 
+    def __repr__(self):
+        return f'Refs(b={self.b}, c={self.c}, S={self.S}, x={self.x}, y={self.y}, z={self.z}, S_CD0={self.S_CD0})'
+
 
 class Runner:
 
