@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 from importlib.resources import files
 import jsonschema
+from spq.spq.aero import Dens, Vel
 
 
 def restart(fname: str | Path) -> None:
@@ -112,10 +113,36 @@ def get_excres_drag() -> pd.DataFrame:
     return df
 
 
-def get_parasite_sref() -> float:
+def get_parasite_refs() -> float:
     rid = vsp.FindLatestResultsID("Parasite_Drag")
-    sref = vsp.GetDoubleResults(rid, "FC_Sref")
-    return sref[0]
+    S_ref = vsp.GetDoubleResults(rid, "FC_Sref")[0]
+
+    # Density.
+    dens_value = vsp.GetDoubleResults(rid, "FC_Rho")[0]
+    dens_unit = vsp.GetStringResults(rid, "Rho_Label")[0]
+    if "slug" in dens_unit:
+        ρ = Dens.fromslugft3(dens_value)
+    elif "kg" in dens_unit:
+        ρ = Dens.fromkgm3(dens_value)
+
+    # Velocity.
+    vel_value = vsp.GetDoubleResults(rid, "FC_Vinf")[0]
+    vel_unit  = vsp.GetStringResults(rid, "Vinf_Label")[0]
+    if "KEAS" in vel_unit:
+        vel = Vel.fromkt(vel_value)
+        ρ = Dens(1.225)
+    elif "KTAS" in vel_unit:
+        vel = Vel.fromkt(vel_value)
+    elif "ft/s" in vel_unit:
+        vel = Vel.fromfps(vel_value)
+    elif "m/s" in vel_unit:
+        vel = Vel.fromms(vel_value)
+    elif "mph" in vel_unit:
+        vel = Vel.frommph(vel_value)
+    elif "km/h" in vel_unit:
+        vel = Vel.fromkmh(vel_value)
+        
+    return ρ, vel, S_ref
 
 
 class VspuException(Exception):
@@ -123,24 +150,31 @@ class VspuException(Exception):
 
 
 class Refs:
-    def __init__(self, b=1, c=1, S=1, x=1, y=1, z=1, S_CD0=1):
-        self.b = b
-        self.c = c
-        self.S = S
-        self.x = x
-        self.y = y
-        self.z = z
-        self.S_CD0 = S_CD0
 
-    @classmethod
-    def from_vspaero_ref(cls, bcSxyz_tuple: tuple[float]):
+    def __init__(self, **kwargs):
+        self.add(**kwargs)
+    
+    def add(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def add_vspaero_refs(self, bcSxyz_tuple: tuple[float]):
         if len(bcSxyz_tuple) != 6:
             raise ValueError(
                 "Tuple must have exactly 6 elements: (b, c, S, x, y, z)")
-        return cls(*bcSxyz_tuple)
+        for k, v in zip('bcSxyz', bcSxyz_tuple):
+            self.add(**{k:v})
 
+    def add_parasite_refs(self, ρvS_tuple: tuple[float]):
+        if len(ρvS_tuple) != 3:
+            raise ValueError(
+                "Tuple must have exactly 3 elements: (ρ, vel, S)")
+        for k, v in zip('ρvS', ρvS_tuple):
+            self.add(**{k:v})
+        
     def __repr__(self):
-        return f'Refs(b={self.b}, c={self.c}, S={self.S}, x={self.x}, y={self.y}, z={self.z}, S_CD0={self.S_CD0})'
+        attrs = ', '.join(f'{key}={value!r}' for key, value in self.__dict__.items())
+        return f'{self.__class__.__name__}({attrs})'
 
 
 class Runner:
@@ -153,7 +187,8 @@ class Runner:
         self.geom_drag = None
         self.excres_drag = None
         self.sweep = None
-        self.refs = Refs()
+        self.aero_refs = Refs()
+        self.parasite_refs = Refs()
 
         self.errorMgr = vsp.ErrorMgrSingleton.getInstance()
         self.errorMgr.SilenceErrors()
@@ -197,15 +232,15 @@ class Runner:
                     change_an_input(an, name, value)
 
             vsp.ExecAnalysis(an)
-
+            
             if an == "VSPAEROSweep":
                 self.polar = get_polar_results()
                 self.load = get_load_results()
-                self.refs = Refs.from_vspaero_ref(get_vspaero_refs())
+                self.aero_refs.add_vspaero_refs(get_vspaero_refs())
             if an == "ParasiteDrag":
                 self.geom_drag = get_geom_drag()
                 self.excres_drag = get_excres_drag()
-                self.refs.S_CD0 = get_parasite_sref()
+                self.parasite_refs.add_parasite_refs(get_parasite_refs())
 
         vsp.DeleteAllResults()
         self.rerr()

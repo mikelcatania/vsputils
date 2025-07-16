@@ -7,7 +7,8 @@ authors = [
 ]
 dependencies = [
   "numpy",
-  "pandas"
+  "pandas",
+  "spq"
 ]
 readme = "README.md"
 requires-python = ">=3.12"

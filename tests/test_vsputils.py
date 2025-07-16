@@ -112,7 +112,7 @@ class TestFuns(unittest.TestCase):
         self.assertSetEqual(set(df.columns),
                             set(["Alpha", "CDi", "CDo", "CDt", "CMy", "CL"]))
 
-    def test_parasitic_drag(self):
+    def test_parasite_drag(self):
         vsp_file = res_dir / "simple.vsp3"
         vspu.restart(vsp_file)
         vsp.ExecAnalysis("ParasiteDrag")
@@ -129,7 +129,7 @@ class TestFuns(unittest.TestCase):
         self.assertSetEqual(set(df.columns),
                             set(["Excres_Amount", "Excres_f"]))
 
-        self.assertEqual(vspu.get_parasite_sref(), 102.0)
+        self.assertEqual(vspu.get_parasite_refs(), (1.225, 102.888, 102.0))
 
     def tearDown(self):
 
@@ -146,35 +146,40 @@ class TestRefs(unittest.TestCase):
         err.SilenceErrors()
 
     def test_init(self):
-        r = vspu.Refs()
-        self.assertEqual(r.b, 1)
-        self.assertEqual(r.c, 1)
-        self.assertEqual(r.S, 1)
-        self.assertEqual(r.x, 1)
-        self.assertEqual(r.y, 1)
-        self.assertEqual(r.z, 1)
+        r = vspu.Refs(a=3)
+        self.assertEqual(r.a, 3)
 
-    def test_refs_custom_instantiation(self):
-        r = vspu.Refs(b=2, c=3, S=4, x=5, y=6, z=7)
+        r.add(b = 34)
+        r.add(b = 33)
+        self.assertEqual(r.b, 33)
+
+    def test_refs_fromaerorefs(self):
+        r = vspu.Refs(j = 3)
+        r.add_vspaero_refs((2, 3, 4, 5, 6, 7))
         self.assertEqual(r.b, 2)
         self.assertEqual(r.c, 3)
         self.assertEqual(r.S, 4)
         self.assertEqual(r.x, 5)
         self.assertEqual(r.y, 6)
         self.assertEqual(r.z, 7)
+        self.assertEqual(r.j, 3)
 
-    def test_refs_fromrefs(self):
-        r = vspu.Refs.from_vspaero_ref((2, 3, 4, 5, 6, 7))
-        self.assertEqual(r.b, 2)
-        self.assertEqual(r.c, 3)
-        self.assertEqual(r.S, 4)
-        self.assertEqual(r.x, 5)
-        self.assertEqual(r.y, 6)
-        self.assertEqual(r.z, 7)
-
+    def test_refs_fromparasiterefs(self):
+        r = vspu.Refs(j = 3)
+        r.add_parasite_refs((1, 2, 3))
+        self.assertEqual(r.ρ, 1)
+        self.assertEqual(r.v, 2)
+        self.assertEqual(r.S, 3)
+        self.assertEqual(r.j, 3)
+        
     def test_refs_fromrefs_invalid_tuple(self):
+        r = vspu.Refs()
         with self.assertRaises(ValueError):
-            vspu.Refs.from_vspaero_ref((1, 2, 3))  # Tuple with fewer than 6 elements
+            r.add_vspaero_refs((1, 2, 3))  # Tuple with fewer than 6 elements
+
+        with self.assertRaises(ValueError):
+            r.add_parasite_refs((1, 2))  # Tuple with fewer than 3 elements
+        
 
 class TestYaml(unittest.TestCase):
 
