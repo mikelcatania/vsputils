@@ -73,8 +73,8 @@ def get_load_results() -> pd.DataFrame:
         rid = vsp.FindResultsID("VSPAERO_Load", idx)
         aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
         df = res2df(rid,
-                    ["WingId", "Yavg", "cl*c/cref", "cd*c/cref",
-                     "cmy*c/cref", "Chord"])
+                    ["VortexSheet", "Yavg", "cl*c/cref", "cdi*c/cref",
+                     "cmyi*c/cref", "Chord"])
         df['aoa'] = aoa
         df['aoa_idx'] = idx
         return df
@@ -97,7 +97,7 @@ def get_vspaero_refs() -> tuple[float]:
 
 def get_polar_results() -> pd.DataFrame:
     rid = vsp.FindLatestResultsID("VSPAERO_Polar")
-    df = res2df(rid, ["Alpha", "CDi", "CDo", "CDt", "CMy", "CL"])
+    df = res2df(rid, ["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLi"])
     return df
 
 

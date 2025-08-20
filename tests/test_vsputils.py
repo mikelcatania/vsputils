@@ -58,7 +58,7 @@ class TestFuns(unittest.TestCase):
         vspu.restart(vsp_file)
         vsp.ExecAnalysis("VSPAEROReadPreviousAnalysis")
         rid = vsp.FindResultsID("VSPAERO_Load", 0)
-        df = vspu.res2df(rid, ["WingId", "Yavg", "cl*c/cref"])
+        df = vspu.res2df(rid, ["VortexSheet", "Yavg", "cl*c/cref"])
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
 
@@ -89,8 +89,8 @@ class TestFuns(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
         self.assertSetEqual(set(df.columns),
-                            set(["WingId", "Yavg", "cl*c/cref", "cd*c/cref",
-                                 "cmy*c/cref", "Chord", "aoa", "aoa_idx"]))
+                            set(["VortexSheet", "Yavg", "cl*c/cref", "cdi*c/cref",
+                                 "cmyi*c/cref", "Chord", "aoa", "aoa_idx"]))
 
     def test_get_vspaero_refs(self):
         vsp_file = res_dir / "simple.vsp3"
@@ -110,7 +110,7 @@ class TestFuns(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
         self.assertSetEqual(set(df.columns),
-                            set(["Alpha", "CDi", "CDo", "CDt", "CMy", "CL"]))
+                            set(["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLi"]))
 
     def test_parasite_drag(self):
         vsp_file = res_dir / "simple.vsp3"
