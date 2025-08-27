@@ -145,6 +145,14 @@ def get_parasite_refs() -> float:
     return ρ, vel, S_ref
 
 
+def get_mass_results() -> tuple[float, list[float]]:
+    rid = vsp.FindLatestResultsID('Mass_Properties')
+    mass = res2lst(rid, 'Total_Mass')[0]
+    cg_vec = vsp.GetVec3dResults(rid, 'Total_CG')[0]
+    cg = [cg_vec.x(), cg_vec.y(), cg_vec.z()]
+    return mass, cg
+
+
 class VspuException(Exception):
     pass
 
@@ -177,6 +185,13 @@ class Refs:
         return f'{self.__class__.__name__}({attrs})'
 
 
+def rerr(errorMgr: vsp.ErrorMgrSingleton):
+    errs = [errorMgr.PopLastError().GetErrorString()
+            for i in range(errorMgr.GetNumTotalErrors())][::-1]
+    if errs:
+        raise VspuException('\n'.join(errs))
+
+
 class Runner:
 
     def __init__(self, case_dict: dict):
@@ -195,10 +210,7 @@ class Runner:
 
     def rerr(self):
         '''Check and raise errors'''
-        errs = [self.errorMgr.PopLastError().GetErrorString()
-                for i in range(self.errorMgr.GetNumTotalErrors())][::-1]
-        if errs:
-            raise VspuException('\n'.join(errs))
+        rerr(self.errorMgr)
 
     def restart(self):
         restart(self.d['fname'])
