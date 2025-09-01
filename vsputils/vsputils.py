@@ -201,7 +201,6 @@ class Runner:
         self.load = None
         self.geom_drag = None
         self.excres_drag = None
-        self.sweep = None
         self.aero_refs = Refs()
         self.parasite_refs = Refs()
 
