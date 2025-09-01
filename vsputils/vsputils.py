@@ -2,6 +2,7 @@ import openvsp as vsp
 import pandas as pd
 from pathlib import Path
 import yaml
+import json
 from importlib.resources import files
 import jsonschema
 from spq.spq.aero import Dens, Vel
@@ -179,6 +180,13 @@ class Refs:
                 "Tuple must have exactly 3 elements: (ρ, vel, S)")
         for k, v in zip('ρvS', ρvS_tuple):
             self.add(**{k:v})
+
+    def to_dict(self):
+        return self.__dict__
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(**d)
         
     def __repr__(self):
         attrs = ', '.join(f'{key}={value!r}' for key, value in self.__dict__.items())
@@ -197,10 +205,10 @@ class Runner:
     def __init__(self, case_dict: dict):
         self.d = case_dict
         self.name = case_dict['name']
-        self.polar = None
-        self.load = None
-        self.geom_drag = None
-        self.excres_drag = None
+        self.polar = pd.DataFrame()
+        self.load = pd.DataFrame()
+        self.geom_drag = pd.DataFrame()
+        self.excres_drag = pd.DataFrame()
         self.aero_refs = Refs()
         self.parasite_refs = Refs()
 
@@ -263,6 +271,30 @@ class Runner:
         self.del_subsurf()
         self.exec_an()
 
+    def to_dict(self):
+        return {
+            'd': self.d,
+            'name': self.name,
+            'polar': self.polar.to_dict(orient='tight'),
+            'load': self.load.to_dict(orient='tight'),
+            'geom_drag': self.geom_drag.to_dict(orient='tight'),
+            'excres_drag': self.excres_drag.to_dict(orient='tight'),
+            'aero_refs': self.aero_refs.to_dict(),
+            'parasite_refs': self.parasite_refs.to_dict()
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        inst = cls(data['d'])
+        inst.name = data['name']
+        inst.polar = pd.DataFrame.from_dict(data['polar'], orient='tight')
+        inst.load = pd.DataFrame.from_dict(data['load'], orient='tight')
+        inst.geom_drag = pd.DataFrame.from_dict(data['geom_drag'], orient='tight')
+        inst.excres_drag = pd.DataFrame.from_dict(data['excres_drag'], orient='tight')
+        inst.aero_refs = Refs.from_dict(data['aero_refs'])
+        inst.parasite_refs = Refs.from_dict(data['parasite_refs'])
+        return inst
+
 def load_yaml_dict(fname: str | Path, validate: bool = True) -> dict:
     with open(str(fname)) as fp:
         d = yaml.safe_load(fp)
@@ -276,3 +308,12 @@ def load_yaml_dict(fname: str | Path, validate: bool = True) -> dict:
 def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
     d = load_yaml_dict(fname, validate)
     return [Runner(case_dict) for case_dict in d['cases']]
+
+def dump_cases(cs: list[Runner], fname: str | Path) -> None:
+    with open(fname, 'w', encoding='utf8') as fp:
+        json.dump([c.to_dict() for c in cs], fp, ensure_ascii=False, indent=2)
+
+def load_cases(fname: str | Path) -> list[Runner]:
+    with open(fname) as fp:
+        data = json.load(fp)
+    return [Runner.from_dict(d) for d in data]
