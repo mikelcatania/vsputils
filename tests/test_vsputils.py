@@ -110,7 +110,7 @@ class TestFuns(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
         self.assertSetEqual(set(df.columns),
-                            set(["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLi"]))
+                            set(["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLiw"]))
 
     def test_parasite_drag(self):
         vsp_file = res_dir / "simple.vsp3"

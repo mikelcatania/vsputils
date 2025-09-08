@@ -98,7 +98,7 @@ def get_vspaero_refs() -> tuple[float]:
 
 def get_polar_results() -> pd.DataFrame:
     rid = vsp.FindLatestResultsID("VSPAERO_Polar")
-    df = res2df(rid, ["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLi"])
+    df = res2df(rid, ["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLiw"])
     return df
 
 
@@ -114,7 +114,7 @@ def get_excres_drag() -> pd.DataFrame:
     return df
 
 
-def get_parasite_refs() -> float:
+def get_parasite_refs() -> tuple[Dens, Vel, float]:
     rid = vsp.FindLatestResultsID("Parasite_Drag")
     S_ref = vsp.GetDoubleResults(rid, "FC_Sref")[0]
 
