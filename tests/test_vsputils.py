@@ -179,6 +179,26 @@ class TestRefs(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             r.add_parasite_refs((1, 2))  # Tuple with fewer than 3 elements
+
+    def test_dict(self):
+        dct = {'a': 3, 'b': 5}
+        r = vspu.Refs.from_dict(dct)
+        self.assertEqual(r.a, 3)
+        self.assertEqual(r.b, 5)
+        self.assertDictEqual(r.to_dict(), dct)
+
+    def test_eq(self):
+        ra = vspu.Refs()
+        rb = vspu.Refs()
+        self.assertTrue(ra == rb)
+        ra = vspu.Refs(g=3)
+        rb = vspu.Refs(g=3)
+        self.assertTrue(ra == rb)
+        rb.add(h=5)
+        self.assertFalse(ra == rb)
+        ra = vspu.Refs(g=5)
+        rb = vspu.Refs(h=6)
+        self.assertFalse(ra == rb)
         
 
 class TestYaml(unittest.TestCase):
@@ -236,8 +256,30 @@ class TestYaml(unittest.TestCase):
 
 class TestRunner(unittest.TestCase):
 
-    def rerr(self):
-        pass
+    def test_init(self):
+
+        cd = {'name': 'somename',
+              'fname': 'ac.vsp3',
+              'changes': None,
+              'airfoils': ['cont:0:some/path', 'cont:1:some/other/path'],
+              'analyses': {'DefaultAnal': None,
+                           'AnalWithChanges':
+                           {'Alpha': 2.2, 'File': 'log.txt'}}}
+
+        c = vspu.Runner(cd)
+        empty_ref = vspu.Refs()
+
+        self.assertDictEqual(c.d, cd)
+        self.assertEqual(c.name, 'somename')
+        self.assertTrue(c.polar.empty)
+        self.assertTrue(c.load.empty)
+        self.assertTrue(c.geom_drag.empty)
+        self.assertTrue(c.excres_drag.empty)
+        self.assertTrue(c.aero_refs, empty_ref)
+        self.assertTrue(c.parasite_refs, empty_ref)
+        
+        
+        
 
 if __name__ == "__main__":
     unittest.main()
