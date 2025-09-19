@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import pandas as pd
 import unittest
@@ -356,6 +357,66 @@ class TestRunner(unittest.TestCase):
         span = vsp.GetParmVal(gid, "Span", "XSec_1")
         self.assertEqual(span, 50.0)
 
+        rnr.del_subsurf()
+        self.assertEqual(vsp.GetAllSubSurfIDs(), ())
+
+    def test_exec(self):
+
+        temp_aero_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_para_file = tempfile.NamedTemporaryFile(delete=False)
+
+        try:
+            cd = {'name': 'somename', 'fname': 'void.vsp3',
+                  'analyses': {
+                      'VSPAEROComputeGeometry': {
+                          'ThinGeomSet': 1,
+                          'GeomSet': -1
+                      },
+                      'VSPAEROSweep': {
+                          'ThinGeomSet': 1,
+                          'GeomSet': -1,
+                          'RedirectFile': temp_aero_file.name,
+                          'AlphaNpts': 1,
+                          'AlphaStart': 2
+                      },
+                      'ParasiteDrag': {
+                          'FileName': temp_para_file.name,
+                          'GeomSet': 3
+                      }
+                  }
+                  }
+
+            rnr = vspu.Runner(cd)
+
+            # Gonna start from scratch.
+            vsp.VSPRenew()
+            wid = vsp.AddGeom('WING')
+            vsp.Update()
+            vsp.SetSetFlag(wid, 3, True);
+            vsp.Update()
+            vsp.AddExcrescence("Something", vsp.EXCRESCENCE_CD, 0.0003);
+            vsp.Update()
+
+            rnr.exec_an()
+
+        finally:
+            os.remove(temp_aero_file.name)
+            os.remove(temp_para_file.name)
+
+        ref_aero_ref = vspu.Refs()
+        ref_aero_ref.add_vspaero_refs((1.0, 1.0, 100.0, 0.0, 0.0, 0.0))
+        ref_para_ref = vspu.Refs()
+        # If the test is done only for this function, the following ref will fail.
+        # The ref is done to match a previously loaded vsp3 file. VSPRenew
+        # apparenlty does not set the parasite drag tool values to any global default.
+        ref_para_ref.add_parasite_refs((1.225, 102.888, 102.0))
+        self.assertFalse(rnr.polar.empty)
+        self.assertFalse(rnr.load.empty)
+        self.assertEqual(rnr.aero_refs, ref_aero_ref)
+        self.assertFalse(rnr.geom_drag.empty)
+        self.assertFalse(rnr.excres_drag.empty)
+        self.assertEqual(rnr.parasite_refs, ref_para_ref)
+        
         
         
         
