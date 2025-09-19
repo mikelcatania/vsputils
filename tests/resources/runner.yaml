@@ -1,0 +1,10 @@
+cases:
+  - name: somename
+    fname: resources/simple.vsp3
+    changes:
+      - Wing:XSec_1:Span:50.0
+    del_subsurf: true
+    analyses:
+      VSPAEROComputeGeometry:
+        ThinGeomSet: 3
+        GeomSet: -1

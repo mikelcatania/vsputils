@@ -1,0 +1,128 @@
+[
+  {
+    "d": {
+      "name": "somename",
+      "fname": "ac.vsp3",
+      "changes": null,
+      "airfoils": [
+        "cont:0:some/path",
+        "cont:1:some/other/path"
+      ],
+      "analyses": {
+        "DefaultAnal": null,
+        "AnalWithChanges": {
+          "Alpha": 2.2,
+          "File": "log.txt"
+        }
+      }
+    },
+    "name": "somename",
+    "polar": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "load": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "geom_drag": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "excres_drag": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "aero_refs": {},
+    "parasite_refs": {}
+  },
+  {
+    "d": {
+      "name": "another",
+      "fname": "ad.vsp3",
+      "del_subsurf": true,
+      "changes": [
+        "cont:gr:parm1:3.3",
+        "cont:gr:parm2:4.4"
+      ],
+      "analyses": {
+        "DefaultAnal": null
+      }
+    },
+    "name": "another",
+    "polar": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "load": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "geom_drag": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "excres_drag": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "aero_refs": {},
+    "parasite_refs": {}
+  }
+]

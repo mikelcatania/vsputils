@@ -82,6 +82,10 @@ class TestFuns(unittest.TestCase):
         self.assertRaises(KeyError, vspu.change_an_input,
                           "VSPAEROSweep", "nonexisting", 50.0)
 
+        # Expected error, because the analysis did not exist.
+        err = vsp.ErrorMgrSingleton.getInstance()
+        self.assertRaises(vspu.VspuException, vspu.rerr, err)
+
     def test_get_load_results(self):
         vsp_file = res_dir / "simple.vsp3"
         vspu.restart(vsp_file)
@@ -335,10 +339,24 @@ class TestRunner(unittest.TestCase):
 
     def test_dict(self):
 
-        cases = res_dir.joinpath('cases.json')
-        with open(cases) as fp:
-            cd = json.load(fp)
-        rnr = vspu.Runner.from_dict(cd[0])
+        with open(res_dir.joinpath('cases.json')) as fp:
+            cs = json.load(fp)
+        rnr = vspu.Runner.from_dict(cs[0])
+        self.assertDictEqual(rnr.to_dict(), cs[0])
+
+    def test_funs(self):
+
+        rnrs = vspu.load_yaml(res_dir.joinpath('runner.yaml'))
+        rnrs[0].d['fname'] = res_dir.joinpath('simple.vsp3').resolve()
+        rnr = rnrs[0]
+        rnr.restart()
+
+        rnr.change_model()
+        gid = vsp.FindGeom("Wing", 0)
+        span = vsp.GetParmVal(gid, "Span", "XSec_1")
+        self.assertEqual(span, 50.0)
+
+        
         
         
 
