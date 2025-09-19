@@ -1,6 +1,8 @@
 from pathlib import Path
 import pandas as pd
 import unittest
+import json
+import tempfile
 import openvsp as vsp
 import vsputils.vsputils as vspu
 from jsonschema import ValidationError
@@ -254,6 +256,59 @@ class TestYaml(unittest.TestCase):
         self.assertDictEqual(ref_dict['cases'][1], rnrs[1].d)
 
 
+class TestJson(unittest.TestCase):
+
+    def test_load(self):
+
+        rnrs = vspu.load_cases(res_dir.joinpath('empty_cases.json'))
+        ref_dict = {'cases':
+                    [{'name': 'somename',
+                      'fname': 'ac.vsp3',
+                      'changes': None,
+                      'airfoils': ['cont:0:some/path', 'cont:1:some/other/path'],
+                      'analyses': {'DefaultAnal': None,
+                                   'AnalWithChanges':
+                                   {'Alpha': 2.2, 'File': 'log.txt'}}},
+                     {'name': 'another',
+                      'fname': 'ad.vsp3',
+                      'del_subsurf': True,
+                      'changes': ['cont:gr:parm1:3.3', 'cont:gr:parm2:4.4'],
+                      'analyses': {'DefaultAnal': None}}]}
+        empty_ref = vspu.Refs()
+
+        self.assertDictEqual(ref_dict['cases'][0], rnrs[0].d)
+        self.assertDictEqual(ref_dict['cases'][1], rnrs[1].d)
+        self.assertTrue(rnrs[0].polar.empty)
+        self.assertTrue(rnrs[1].polar.empty)
+        self.assertTrue(rnrs[0].load.empty)
+        self.assertTrue(rnrs[1].load.empty)
+        self.assertTrue(rnrs[0].geom_drag.empty)
+        self.assertTrue(rnrs[1].geom_drag.empty)
+        self.assertTrue(rnrs[0].excres_drag.empty)
+        self.assertTrue(rnrs[1].excres_drag.empty)
+        self.assertTrue(rnrs[0].aero_refs == empty_ref)
+        self.assertTrue(rnrs[1].aero_refs == empty_ref)
+        self.assertTrue(rnrs[0].parasite_refs == empty_ref)
+        self.assertTrue(rnrs[1].parasite_refs == empty_ref)
+
+    def test_dump(self):
+
+        rnrs = vspu.load_yaml(res_dir.joinpath('valid.yml'))
+        with open(res_dir.joinpath('empty_cases.json')) as fp:
+            ref_cs = json.load(fp)
+        with tempfile.NamedTemporaryFile(delete=True) as tf:
+            vspu.dump_cases(rnrs, tf.name)
+            tf.flush()
+            tf.seek(0)
+
+            cs = json.load(tf)
+            for it, rit in zip(cs, ref_cs):
+                self.assertDictEqual(it, rit)
+            
+
+
+
+
 class TestRunner(unittest.TestCase):
 
     def test_init(self):
@@ -275,9 +330,15 @@ class TestRunner(unittest.TestCase):
         self.assertTrue(c.load.empty)
         self.assertTrue(c.geom_drag.empty)
         self.assertTrue(c.excres_drag.empty)
-        self.assertTrue(c.aero_refs, empty_ref)
-        self.assertTrue(c.parasite_refs, empty_ref)
-        
+        self.assertTrue(c.aero_refs == empty_ref)
+        self.assertTrue(c.parasite_refs == empty_ref)
+
+    def test_dict(self):
+
+        cases = res_dir.joinpath('cases.json')
+        with open(cases) as fp:
+            cd = json.load(fp)
+        rnr = vspu.Runner.from_dict(cd[0])
         
         
 
