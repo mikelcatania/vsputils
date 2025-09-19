@@ -9,7 +9,7 @@ import vsputils.vsputils as vspu
 from jsonschema import ValidationError
 
 res_dir = Path(__file__).parent.joinpath('resources')
-
+cur_dir = Path.cwd()
 
 class TestFuns(unittest.TestCase):
 
@@ -417,6 +417,10 @@ class TestRunner(unittest.TestCase):
         self.assertFalse(rnr.excres_drag.empty)
         self.assertEqual(rnr.parasite_refs, ref_para_ref)
         
+    def tearDown(self):
+
+        for f in cur_dir.glob("Unnamed*"):
+            f.unlink()
         
         
         
