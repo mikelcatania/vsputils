@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import pandas as pd
 import unittest
+from unittest.mock import patch
 import json
 import tempfile
 import openvsp as vsp
@@ -416,6 +417,24 @@ class TestRunner(unittest.TestCase):
         self.assertFalse(rnr.geom_drag.empty)
         self.assertFalse(rnr.excres_drag.empty)
         self.assertEqual(rnr.parasite_refs, ref_para_ref)
+
+    def test_run_all(self):
+
+        rnr = vspu.Runner({'name': 'somename'})
+        with patch.object(rnr, 'restart') as mock_restart,\
+             patch.object(rnr, 'change_model') as mock_change_model,\
+             patch.object(rnr, 'change_airfoils') as mock_change_airfoils,\
+             patch.object(rnr, 'del_subsurf') as mock_del_subsurf,\
+             patch.object(rnr, 'exec_an') as mock_exec_an:
+
+            rnr.run_all()
+
+            mock_restart.assert_called_once()
+            mock_change_model.assert_called_once()
+            mock_change_airfoils.assert_called_once()
+            mock_del_subsurf.assert_called_once()
+            mock_exec_an.assert_called_once()
+            
         
     def tearDown(self):
 
