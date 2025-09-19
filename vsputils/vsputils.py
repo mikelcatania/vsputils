@@ -47,7 +47,10 @@ def change_an_input(an: str, name: str, value: float | int | str) -> None:
         vsp.DOUBLE_DATA: vsp.SetDoubleAnalysisInput,
         vsp.STRING_DATA: vsp.SetStringAnalysisInput
     }
-    fun = set_funs[vsp.GetAnalysisInputType(an, name)]
+    try:
+        fun = set_funs[vsp.GetAnalysisInputType(an, name)]
+    except KeyError as e:
+        raise KeyError(f'Input "{name}" not supported for analysis {an}')
     fun(an, name, [value])
 
 
