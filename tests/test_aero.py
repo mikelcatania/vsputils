@@ -44,3 +44,18 @@ class TestDrag(unittest.TestCase):
         ref_vels = [10, 20, 50, 100]
         ref_cd0s = [0.02881764, 0.02629413, 0.02329413, 0.02125431]
         numpy.testing.assert_allclose(cd0(ref_vels), ref_cd0s, rtol=3e-7)
+
+
+class TestAC(unittest.TestCase):
+
+    def test_xac(self):
+
+        rnrs = vspu.load_cases(res_dir.joinpath('cases.json'))
+        p = rnrs[0].polar
+        r = rnrs[0].aero_refs
+
+        xac = vspa.xac(p, r)
+
+        expected_xac = Polynomial([ 1.77776623e+00, -1.70610385e-03, -1.39098698e-06])
+
+        numpy.testing.assert_allclose(xac.coef, expected_xac.coef)

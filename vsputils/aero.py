@@ -5,6 +5,7 @@ import pandas as pd
 from spq.spq.aero import Vel
 from collections.abc import Callable
 from scipy.optimize import curve_fit
+import vsputils.vsputils as vspu
 
 def drag_polar(polar: pd.DataFrame, with_cdo: bool = False) -> Polynomial:
 
@@ -30,3 +31,14 @@ def parasite_drag(v: ndarray[Vel], cd0: ndarray[float]) -> Callable[[ndarray[Vel
     return inv_p
     
     
+def xac(polar: pd.DataFrame, aero_refs: vspu.Refs) -> Polynomial:
+
+    a = polar['Alpha']
+    cl = polar['CLiw']
+    cm = polar['CMiy']
+
+    clp = Polynomial.fit(a, cl, 2)
+    cmp = Polynomial.fit(a, cm, 2)
+
+    xac = -(Polynomial.fit(a, cmp.deriv()(a)/clp.deriv()(a), 2)) * aero_refs.c + aero_refs.x
+    return xac.convert()
