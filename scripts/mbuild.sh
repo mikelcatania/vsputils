@@ -14,6 +14,7 @@ cd repo
 git pull
 
 # Build external libs
+mkdir -p ${MAIN_DIR}/buildlibs
 cd ${MAIN_DIR}/buildlibs
 rm -rf *
 
@@ -22,6 +23,7 @@ cmake -DVSP_USE_SYSTEM_ADEPT2=false -DVSP_USE_SYSTEM_CLIPPER2=false -DVSP_USE_SY
 make -j8
 
 # Build libs
+mkdir -p ${MAIN_DIR}/build
 cd ${MAIN_DIR}/build
 rm -rf *
 
