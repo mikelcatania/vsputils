@@ -8,7 +8,11 @@ authors = [
 dependencies = [
   "numpy",
   "pandas",
-  "spq"
+  "spq",
+  "pyyaml",
+  "jsonschema",
+  "pytest",
+  "pytest-cov"
 ]
 readme = "README.md"
 requires-python = ">=3.12"
