@@ -7,6 +7,7 @@ from importlib.resources import files
 
 import openvsp as vsp
 import vsputils.vsputils as vspu
+import vsputils.aero as vspa
 
 class Runner:
 
@@ -64,6 +65,10 @@ class Runner:
                 self.polar = vspu.get_polar_results()
                 self.load = vspu.get_load_results()
                 self.aero_refs.add_vspaero_refs(vspu.get_vspaero_refs())
+
+                xac = vspa.xac(self.polar, self.aero_refs)
+                self.polar['xac'] = xac(self.polar['Alpha'])
+                self.polar['CMyac'] = self.polar['CMiy'] + self.polar['CLiw'] * (self.polar['xac'] - self.aero_refs.x) / self.aero_refs.c 
             if an == "ParasiteDrag":
                 self.geom_drag = vspu.get_geom_drag()
                 self.excres_drag = vspu.get_excres_drag()

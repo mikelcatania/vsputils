@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import pandas as pd
+from pandas import testing as tm
 import unittest
 from unittest.mock import patch
 import json
@@ -183,8 +184,9 @@ class TestRunner(unittest.TestCase):
                           'ThinGeomSet': 1,
                           'GeomSet': -1,
                           'RedirectFile': temp_aero_file.name,
-                          'AlphaNpts': 1,
-                          'AlphaStart': 2
+                          'AlphaNpts': 3,
+                          'AlphaStart': 2,
+                          'AlphaEnd': 8
                       },
                       'ParasiteDrag': {
                           'FileName': temp_para_file.name,
@@ -199,9 +201,9 @@ class TestRunner(unittest.TestCase):
             vsp.VSPRenew()
             wid = vsp.AddGeom('WING')
             vsp.Update()
-            vsp.SetSetFlag(wid, 3, True);
+            vsp.SetSetFlag(wid, 3, True)
             vsp.Update()
-            vsp.AddExcrescence("Something", vsp.EXCRESCENCE_CD, 0.0003);
+            vsp.AddExcrescence("Something", vsp.EXCRESCENCE_CD, 0.0003)
             vsp.Update()
 
             rnr.exec_an()
@@ -219,6 +221,7 @@ class TestRunner(unittest.TestCase):
         # any global default.
         ref_para_ref.add_parasite_refs((0.6526823360748901, 152.4, 100.0))
         self.assertFalse(rnr.polar.empty)
+        tm.assert_index_equal(rnr.polar.columns, pd.Index(['Alpha', 'CDi', 'CDo', 'CDiw', 'CMiy', 'CLiw', 'xac', 'CMyac']))
         self.assertFalse(rnr.load.empty)
         self.assertEqual(rnr.aero_refs, ref_aero_ref)
         self.assertFalse(rnr.geom_drag.empty)
