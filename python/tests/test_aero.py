@@ -10,6 +10,7 @@ import tempfile
 import openvsp as vsp
 import vsputils.vsputils as vspu
 import vsputils.aero as vspa
+import vsputils.runner as vspr
 from jsonschema import ValidationError
 
 res_dir = Path(__file__).parent.joinpath('resources')
@@ -20,7 +21,7 @@ class TestDrag(unittest.TestCase):
 
     def test_polar(self):
 
-        rnrs = vspu.load_cases(res_dir.joinpath('cases.json'))
+        rnrs = vspr.load_cases(res_dir.joinpath('cases.json'))
         p = rnrs[0].polar
 
         cdi  = vspa.drag_polar(p)
@@ -50,7 +51,7 @@ class TestAC(unittest.TestCase):
 
     def test_xac(self):
 
-        rnrs = vspu.load_cases(res_dir.joinpath('cases.json'))
+        rnrs = vspr.load_cases(res_dir.joinpath('cases.json'))
         p = rnrs[0].polar
         r = rnrs[0].aero_refs
 
