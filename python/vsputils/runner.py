@@ -61,7 +61,7 @@ class Runner:
 
             vsp.ExecAnalysis(an)
             
-            if an == "VSPAEROSweep":
+            if an == "VSPAEROSweep" or an == "VSPAEROReadPreviousAnalysis":
                 self.polar = vspu.get_polar_results()
                 self.load = vspu.get_load_results()
                 self.aero_refs.add_vspaero_refs(vspu.get_vspaero_refs())
