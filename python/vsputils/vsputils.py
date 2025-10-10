@@ -73,7 +73,7 @@ def get_load_results() -> pd.DataFrame:
         rid = vsp.FindResultsID("VSPAERO_Load", idx)
         aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
         df = res2df(rid,
-                    ["VortexSheet", "Yavg", "cl*c/cref", "cdi*c/cref",
+                    ["VortexSheet", "Xavg", "Yavg", "Zavg", "cl*c/cref", "cdi*c/cref",
                      "cmyi*c/cref", "Chord"])
         df['aoa'] = aoa
         df['aoa_idx'] = idx

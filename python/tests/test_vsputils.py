@@ -92,7 +92,7 @@ class TestFuns(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
         self.assertSetEqual(set(df.columns),
-                            set(["VortexSheet", "Yavg", "cl*c/cref", "cdi*c/cref",
+                            set(["VortexSheet", "Xavg", "Yavg", "Zavg", "cl*c/cref", "cdi*c/cref",
                                  "cmyi*c/cref", "Chord", "aoa", "aoa_idx"]))
 
     def test_get_vspaero_refs(self):
