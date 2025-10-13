@@ -15,13 +15,14 @@ def plot_load(load: pd.DataFrame, ax: plt.Axes, vs: list[int] | int | None = Non
     dist_type = {'cl': 'cl*c/cref',
                  'cd': 'cdi*c/cref',
                  'cm': 'cmyi*c/cref'}
-
+    dist_name = dist_type.get(dtype, dtype)
+    
     lns = []
     for a, df in ldf.groupby('aoa'):
         if chord_dist:
-            l, = ax.plot(df['Yavg'], df[dist_type[dtype]] / df['Chord'] * c_ref, label=a)
+            l, = ax.plot(df['Yavg'], df[dist_name] / df['Chord'] * c_ref, label=a)
         else:
-            l, = ax.plot(df['Yavg'], df[dist_type[dtype]], label=a)
+            l, = ax.plot(df['Yavg'], df[dist_name], label=a)
         lns.append(l)
 
     return lns
