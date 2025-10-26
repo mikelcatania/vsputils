@@ -5,13 +5,13 @@ TMPDIR="/tmp/vstmp"
 
 mkdir -p ${TMPDIR}
 
-cp -r ${OPT_DIR}/python ${TMPDIR}/
+cp -r ${OPT_DIR}/ ${TMPDIR}/
 
 micromamba activate vsppytools
 
-cd ${TMPDIR}
+cd ${TMPDIR}/python
 
-pip install .
+pip install -r requirements.txt
 
 micromamba deactivate
 
