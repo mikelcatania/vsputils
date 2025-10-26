@@ -45,7 +45,7 @@ def change_an_input(an: str, name: str, value: float | int | str) -> None:
     }
     try:
         fun = set_funs[vsp.GetAnalysisInputType(an, name)]
-    except KeyError as e:
+    except KeyError:
         raise KeyError(f'Input "{name}" not supported for analysis {an}')
     fun(an, name, [value])
 
@@ -73,8 +73,8 @@ def get_load_results() -> pd.DataFrame:
         rid = vsp.FindResultsID("VSPAERO_Load", idx)
         aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
         df = res2df(rid,
-                    ["VortexSheet", "Xavg", "Yavg", "Zavg", "cl*c/cref", "cdi*c/cref",
-                     "cmyi*c/cref", "Chord"])
+                    ["VortexSheet", "Xavg", "Yavg", "Zavg", "cl*c/cref",
+                     "cdi*c/cref",  "cmyi*c/cref", "Chord"])
         df['aoa'] = aoa
         df['aoa_idx'] = idx
         return df
@@ -127,7 +127,7 @@ def get_parasite_refs() -> tuple[Dens, Vel, float]:
 
     # Velocity.
     vel_value = vsp.GetDoubleResults(rid, "FC_Vinf")[0]
-    vel_unit  = vsp.GetStringResults(rid, "Vinf_Label")[0]
+    vel_unit  = vsp.GetStringResults(rid, "Vinf_Label")[0]  # noqa: E221
     if "KEAS" in vel_unit:
         vel = Vel.fromkt(vel_value)
         ρ = Dens(1.225)
@@ -141,7 +141,7 @@ def get_parasite_refs() -> tuple[Dens, Vel, float]:
         vel = Vel.frommph(vel_value)
     elif "km/h" in vel_unit:
         vel = Vel.fromkmh(vel_value)
-        
+
     return ρ, vel, S_ref
 
 
@@ -161,7 +161,7 @@ class Refs:
 
     def __init__(self, **kwargs):
         self.add(**kwargs)
-    
+
     def add(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -171,14 +171,14 @@ class Refs:
             raise ValueError(
                 "Tuple must have exactly 6 elements: (b, c, S, x, y, z)")
         for k, v in zip('bcSxyz', bcSxyz_tuple):
-            self.add(**{k:v})
+            self.add(**{k: v})
 
     def add_parasite_refs(self, ρvS_tuple: tuple[float]):
         if len(ρvS_tuple) != 3:
             raise ValueError(
                 "Tuple must have exactly 3 elements: (ρ, vel, S)")
         for k, v in zip('ρvS', ρvS_tuple):
-            self.add(**{k:v})
+            self.add(**{k: v})
 
     def to_dict(self):
         return self.__dict__
@@ -186,9 +186,9 @@ class Refs:
     @classmethod
     def from_dict(cls, d):
         return cls(**d)
-        
+
     def __repr__(self):
-        attrs = ', '.join(f'{key}={value!r}' for key, value in self.__dict__.items())
+        attrs = ', '.join(f'{key}={value!r}' for key, value in self.__dict__.items())  # noqa: E501
         return f'{self.__class__.__name__}({attrs})'
 
     def __eq__(self, other):
@@ -200,6 +200,3 @@ def rerr(errorMgr: vsp.ErrorMgrSingleton):
             for i in range(errorMgr.GetNumTotalErrors())][::-1]
     if errs:
         raise VspuException('\n'.join(errs))
-
-
-

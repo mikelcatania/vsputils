@@ -9,6 +9,7 @@ import openvsp as vsp
 import vsputils.vsputils as vspu
 import vsputils.aero as vspa
 
+
 class Runner:
 
     def __init__(self, case_dict: dict):
@@ -60,7 +61,7 @@ class Runner:
                     vspu.change_an_input(an, name, value)
 
             vsp.ExecAnalysis(an)
-            
+
             if an == "VSPAEROSweep" or an == "VSPAEROReadPreviousAnalysis":
                 self.polar = vspu.get_polar_results()
                 self.load = vspu.get_load_results()
@@ -68,7 +69,8 @@ class Runner:
 
                 xac = vspa.xac(self.polar, self.aero_refs)
                 self.polar['xac'] = xac(self.polar['Alpha'])
-                self.polar['CMyac'] = self.polar['CMiy'] + self.polar['CLiw'] * (self.polar['xac'] - self.aero_refs.x) / self.aero_refs.c 
+                self.polar['CMyac'] = self.polar['CMiy'] + \
+                    self.polar['CLiw'] * (self.polar['xac'] - self.aero_refs.x) / self.aero_refs.c  # noqa: E501
             if an == "ParasiteDrag":
                 self.geom_drag = vspu.get_geom_drag()
                 self.excres_drag = vspu.get_excres_drag()
@@ -102,8 +104,10 @@ class Runner:
         inst.name = data['name']
         inst.polar = pd.DataFrame.from_dict(data['polar'], orient='tight')
         inst.load = pd.DataFrame.from_dict(data['load'], orient='tight')
-        inst.geom_drag = pd.DataFrame.from_dict(data['geom_drag'], orient='tight')
-        inst.excres_drag = pd.DataFrame.from_dict(data['excres_drag'], orient='tight')
+        inst.geom_drag = pd.DataFrame.from_dict(data['geom_drag'],
+                                                orient='tight')
+        inst.excres_drag = pd.DataFrame.from_dict(data['excres_drag'],
+                                                  orient='tight')
         inst.aero_refs = vspu.Refs.from_dict(data['aero_refs'])
         inst.parasite_refs = vspu.Refs.from_dict(data['parasite_refs'])
         return inst
@@ -119,13 +123,16 @@ def load_yaml_dict(fname: str | Path, validate: bool = True) -> dict:
         jsonschema.validate(instance=d, schema=sc)
     return d
 
+
 def load_yaml(fname: str | Path, validate: bool = True) -> list[Runner]:
     d = load_yaml_dict(fname, validate)
     return [Runner(case_dict) for case_dict in d['cases']]
 
+
 def dump_cases(cs: list[Runner], fname: str | Path) -> None:
     with open(fname, 'w', encoding='utf8') as fp:
         json.dump([c.to_dict() for c in cs], fp, ensure_ascii=False, indent=2)
+
 
 def load_cases(fname: str | Path) -> list[Runner]:
     with open(fname) as fp:
