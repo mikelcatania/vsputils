@@ -195,7 +195,9 @@ class Refs:
         return self.__dict__ == other.__dict__
 
 
-def rerr(errorMgr: vsp.ErrorMgrSingleton):
+def rerr(errorMgr: vsp.ErrorMgrSingleton | None = None):
+    if errorMgr is None:
+        errorMgr = vsp.ErrorMgrSingleton.getInstance()
     errs = [errorMgr.PopLastError().GetErrorString()
             for i in range(errorMgr.GetNumTotalErrors())][::-1]
     if errs:
