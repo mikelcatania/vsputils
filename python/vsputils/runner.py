@@ -17,6 +17,7 @@ class Runner:
         self.name = case_dict['name']
         self.polar = pd.DataFrame()
         self.load = pd.DataFrame()
+        self.stab = pd.DataFrame()
         self.geom_drag = pd.DataFrame()
         self.excres_drag = pd.DataFrame()
         self.aero_refs = vspu.Refs()
@@ -63,14 +64,19 @@ class Runner:
             vsp.ExecAnalysis(an)
 
             if an == "VSPAEROSweep" or an == "VSPAEROReadPreviousAnalysis":
-                self.polar = vspu.get_polar_results()
                 self.load = vspu.get_load_results()
                 self.aero_refs.add_vspaero_refs(vspu.get_vspaero_refs())
+                # If Sweep was run in stability mode, there is no polar result.
+                try:
+                    self.polar = vspu.get_polar_results()
+                    xac = vspa.xac(self.polar, self.aero_refs)
+                    self.polar['xac'] = xac(self.polar['Alpha'])
+                    self.polar['CMyac'] = self.polar['CMiy'] + \
+                        self.polar['CLiw'] * (self.polar['xac'] - self.aero_refs.x) / self.aero_refs.c  # noqa: E501
+                except vspu.VspuException:
+                    pass
+                self.stab = vspu.get_stab_results()
 
-                xac = vspa.xac(self.polar, self.aero_refs)
-                self.polar['xac'] = xac(self.polar['Alpha'])
-                self.polar['CMyac'] = self.polar['CMiy'] + \
-                    self.polar['CLiw'] * (self.polar['xac'] - self.aero_refs.x) / self.aero_refs.c  # noqa: E501
             if an == "ParasiteDrag":
                 self.geom_drag = vspu.get_geom_drag()
                 self.excres_drag = vspu.get_excres_drag()
@@ -92,6 +98,7 @@ class Runner:
             'name': self.name,
             'polar': self.polar.to_dict(orient='tight'),
             'load': self.load.to_dict(orient='tight'),
+            'stab': self.stab.to_dict(orient='tight'),
             'geom_drag': self.geom_drag.to_dict(orient='tight'),
             'excres_drag': self.excres_drag.to_dict(orient='tight'),
             'aero_refs': self.aero_refs.to_dict(),
@@ -104,6 +111,7 @@ class Runner:
         inst.name = data['name']
         inst.polar = pd.DataFrame.from_dict(data['polar'], orient='tight')
         inst.load = pd.DataFrame.from_dict(data['load'], orient='tight')
+        inst.stab = pd.DataFrame.from_dict(data['stab'], orient='tight')
         inst.geom_drag = pd.DataFrame.from_dict(data['geom_drag'],
                                                 orient='tight')
         inst.excres_drag = pd.DataFrame.from_dict(data['excres_drag'],

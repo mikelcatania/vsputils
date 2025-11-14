@@ -39,6 +39,17 @@
         null
       ]
     },
+    "stab": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
     "geom_drag": {
       "index": [],
       "columns": [],
@@ -90,6 +101,17 @@
       ]
     },
     "load": {
+      "index": [],
+      "columns": [],
+      "data": [],
+      "index_names": [
+        null
+      ],
+      "column_names": [
+        null
+      ]
+    },
+    "stab": {
       "index": [],
       "columns": [],
       "data": [],

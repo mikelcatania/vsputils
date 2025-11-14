@@ -97,9 +97,32 @@ def get_vspaero_refs() -> tuple[float]:
 
 def get_polar_results() -> pd.DataFrame:
     rid = vsp.FindLatestResultsID("VSPAERO_Polar")
+    rerr()
     df = res2df(rid, ["Alpha", "CDi", "CDo", "CDiw", "CMiy", "CLiw"])
     return df
 
+
+def get_stab_results() -> pd.DataFrame:
+    def load_df(idx):
+        rid = vsp.FindResultsID("VSPAERO_Stab", idx)
+        stab_type = vsp.GetIntResults(rid, 'StabilityType')[0]
+        if stab_type == vsp.STABILITY_PITCH:
+            df = res2df(rid, ['AerodynamicCenterisat'])
+            aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0] - 1.0
+        if stab_type == vsp.STABILITY_DEFAULT:
+            wanted_names = ['CD', 'CL', 'CMx', 'CMy', 'CMz']
+            names = [name for name in vsp.GetAllDataNames(rid) if name.split('_')[0] in wanted_names]
+            df = res2df(rid, names)
+            aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
+        df['aoa'] = aoa
+        df['aoa_idx'] = idx
+        return df
+    dflst = [load_df(i) for i in range(vsp.GetNumResults("VSPAERO_Stab"))]
+    if dflst:
+        df = pd.concat(dflst, ignore_index=True, sort=False)
+        return df
+    else:
+        return pd.DataFrame()
 
 def get_geom_drag() -> pd.DataFrame:
     rid = vsp.FindLatestResultsID("Parasite_Drag")
