@@ -110,7 +110,7 @@ def get_stab_results() -> pd.DataFrame:
             df = res2df(rid, ['AerodynamicCenterisat'])
             aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0] - 1.0
         if stab_type == vsp.STABILITY_DEFAULT:
-            wanted_names = ['CD', 'CL', 'CMx', 'CMy', 'CMz']
+            wanted_names = ['CD', 'CL', 'CMx', 'CMy', 'CMz', 'X', 'SM']
             names = [name for name in vsp.GetAllDataNames(rid) if name.split('_')[0] in wanted_names]
             df = res2df(rid, names)
             aoa = vsp.GetDoubleResults(rid, "FC_AoA_")[0]
