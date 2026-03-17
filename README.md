@@ -125,13 +125,15 @@ Run from the `OpenVSP/` directory:
 docker build --build-arg REPO_PATH=./repo --network host -t openvsp:latest -f vsputils/docker/Dockerfile .
 ```
 
+Use other options such as `--network host` as needed.
+
 ### Running an image
 
 ```bash
 docker run -it openvsp /bin/bash
 ```
 
-To run an analysis with a model and script:
+The image has its working directory at `/tmp/wdir`. To run an analysis with a model and script:
 
 ```bash
 docker run --rm \
@@ -139,6 +141,8 @@ docker run --rm \
   -v /home/me/scripts:/tmp/scr \
   openvsp vspscript -script /tmp/scr/af.vspscript ap.vsp3 > stdout.log 2> stderr.log
 ```
+
+The command above will redirect the outputs _in the host_, not in the container.
 
 ## Scripts
 
