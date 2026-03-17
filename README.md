@@ -9,7 +9,6 @@ Python wrapper utilities for the [OpenVSP](http://openvsp.org/) API, providing s
 - **Results Processing** — Extract analysis results into pandas DataFrames for polar, load distribution, stability, and drag data
 - **Batch Execution** — Run multi-case studies from YAML configuration files with schema validation
 - **Aerodynamic Calculations** — Fit drag polars, compute aerodynamic center, and transfer moment references
-- **Airfoil Utilities** — Read, write, and generate airfoils in Selig, Lednicer, Pointwise, and VSP formats
 - **Visualization** — Plot spanwise load distributions
 
 ## Installation
@@ -51,7 +50,7 @@ vspr.dump_cases(runners, "results.json")
 runners = vspr.load_cases("results.json")
 ```
 
-### Aerodynamic calculations
+### Aerodynamic utilities
 
 ```python
 import vsputils.aero as vspa
@@ -96,7 +95,6 @@ cases:
 | `vsputils.runner` | `Runner` class for orchestrating full analysis workflows from YAML/JSON configs |
 | `vsputils.aero` | Aerodynamic calculations — drag polars, aerodynamic center, moment transfer, parasite drag fitting |
 | `vsputils.plot` | Plotting utilities for spanwise load distributions |
-| `vsputils.airfoil` | Airfoil coordinate processing — import/export multiple formats, NACA generation, Kulfan parameterization |
 
 ## Testing
 
