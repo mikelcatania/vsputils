@@ -105,11 +105,11 @@ cd python
 pytest
 ```
 
-## Docker
+# Docker
 
 Dockerfiles to create Docker images for running OpenVSP via scripts (no GUI or Python).
 
-### Building an image
+## Building an image
 
 The build context must contain the OpenVSP repository. With the following layout:
 
@@ -127,7 +127,7 @@ docker build --build-arg REPO_PATH=./repo --network host -t openvsp:latest -f vs
 
 Use other options such as `--network host` as needed.
 
-### Running an image
+## Running an image
 
 ```bash
 docker run -it openvsp /bin/bash
@@ -144,10 +144,10 @@ docker run --rm \
 
 The command above will redirect the outputs _in the host_, not in the container.
 
-## Scripts
+# Scripts
 
 Installation scripts for ease of installation of OpenVSP.
 
-## License
+# License
 
 See [LICENSE](LICENSE) for details.
