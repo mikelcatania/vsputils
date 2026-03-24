@@ -142,9 +142,6 @@ docker run --rm \
 
 The command above will redirect the outputs _in the host_, not in the container.
 
-# Scripts
-
-Installation scripts for ease of installation of OpenVSP.
 
 # License
 
