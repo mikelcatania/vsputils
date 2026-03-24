@@ -87,6 +87,8 @@ cases:
         FileName: drag_output.txt
 ```
 
+If no options are given to the analyses, they are run with whatever options are saved in the loaded vsp3 model.
+
 ## Modules
 
 | Module | Description |
