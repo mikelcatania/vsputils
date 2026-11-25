@@ -7,6 +7,19 @@ from spq.spq.aero import Dens, Vel
 def restart(fname: str | Path) -> None:
     vsp.VSPRenew()
     vsp.ReadVSPFile(str(fname))
+    reset_analysis_inputs()
+
+
+def reset_analysis_inputs() -> None:
+    '''Set the inputs of all analyses to the defaults of the current model.
+
+    Since OpenVSP 3.57, reading a vsp3 file no longer refreshes the analysis
+    inputs, so they keep the values from whatever model was loaded when the
+    defaults were last set (e.g. an empty vehicle). Reset them so the analyses
+    use the settings saved in the loaded model.
+    '''
+    for an in vsp.ListAnalysis():
+        vsp.SetAnalysisInputDefaults(an)
 
 
 def parse_parm_change(cstring: str):
